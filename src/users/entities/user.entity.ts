@@ -13,4 +13,22 @@ export class UserEntity {
 
   @Column()
   address: string;
+
+  @Column()
+  email: string;
+
+  @Column()
+  description: string;
+
+  @Column()
+  website: string;
+
+  @Column()
+  facebook: string;
+
+  @Column()
+  twitter: string;
+
+  @Column()
+  instargram: string;
 }

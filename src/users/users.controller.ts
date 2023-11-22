@@ -7,14 +7,21 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MediaService } from 'src/media/service/media.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly mediaService: MediaService,
+  ) {}
 
   @Get('infor')
   getUserByAdress(@Query('address') address: string) {
@@ -31,18 +38,23 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @UseInterceptors(FileInterceptor('logo'))
+  @Post('edit')
+  async edit(@UploadedFile() logo: any, @Body('dataRequest') dataRequest: any) {
+    let logoUrl: any;
+    const dataParse = JSON.parse(dataRequest);
+    if (logo) {
+      const key = `user/logo-${Date.now()}`;
+      const uploadResult = await this.mediaService.uploadFileS3(
+        logo.buffer,
+        key,
+        logo.mimetype,
+      );
+      logoUrl = uploadResult.Key;
+    }
+    if (logoUrl) {
+      dataParse.logo = logoUrl;
+    }
+    return this.usersService.edit(dataParse);
   }
 }

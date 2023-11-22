@@ -30,6 +30,18 @@ export class UsersService {
     }
   }
 
+  async edit(data: UpdateUserDto) {
+    const update = new UserEntity();
+    update.logo = data.logo;
+    update.name = data.name;
+    update.description = data.description;
+    update.email = data.email;
+    update.website = data.website;
+    update.facebook = data.facebook;
+    update.twitter = data.twitter;
+    update.instargram = data.instargram;
+    return await this.userRepo.update(data.id, update);
+  }
   findAll() {
     return `This action returns all users`;
   }
